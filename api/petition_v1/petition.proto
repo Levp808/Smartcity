@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+package petition;
+
+option go_package = "pkg/petition_v1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
+
+service Petition {
+    rpc CreatePetition(CreatePetitionRequest) returns (CreatePetitionResponse) {
+        option (google.api.http)= {
+            post: "/v1/PetitionService/CreatePetition"
+            body: "*"
+        };
+    };
+    rpc GetPetition(GetPetitionRequest) returns (GetPetitionResponse) {
+        option (google.api.http)= {
+            get: "/v1/PetitionService/GetPetition/{petition_id}"
+        };
+    };
+    rpc UpdatePetition(UpdatePetitionRequest) returns (UpdatePetitionResponse) {
+        option (google.api.http)= {
+            patch: "/v1/PetitionService/UpdatePetition"
+            body: "*"
+        };
+    };
+    rpc DeletePetition(DeletePetitionRequest) returns (DeletePetitionResponse) {
+        option (google.api.http)= {
+            delete: "/v1/PetitionService/DeletePetition/{petition_id}"
+        };
+    };
+}
+
+message CreatePetitionRequest {
+    string location = 1;
+    string description = 2;
+}
+
+message CreatePetitionResponse {
+    string petition_id = 1;
+}
+
+message GetPetitionRequest {
+    string petition_id = 1;
+}
+
+message GetPetitionResponse {
+    string petition_id = 1;
+    string location = 2;
+    string description = 3;
+    google.protobuf.Timestamp created_at = 4;
+    string status = 5;
+    google.protobuf.StringValue department = 6;
+    google.protobuf.Timestamp done_at = 7;
+    google.protobuf.StringValue report_id = 8;
+    google.protobuf.StringValue content_job = 9;
+}
+
+message UpdatePetitionRequest{
+    string petition_id = 1;
+    google.protobuf.StringValue location = 2;
+    google.protobuf.StringValue description = 3;
+    google.protobuf.StringValue department = 4;
+    google.protobuf.Timestamp done_at = 5;
+    google.protobuf.StringValue report_id = 6;
+    google.protobuf.StringValue content_job = 7;
+}
+
+message UpdatePetitionResponse {
+    bool success = 1;
+    ErrorCode error_message = 2; 
+}
+
+message DeletePetitionRequest {
+    string petition_id = 1;
+}
+
+message DeletePetitionResponse {
+    bool success = 1;
+    ErrorCode error_message = 2; 
+}
+
+enum ErrorCode {
+    NONE = 0;
+    NOT_FOUND = 1;
+    BAD_REQUEST = 2;
+}

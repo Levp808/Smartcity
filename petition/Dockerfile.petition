@@ -1,0 +1,19 @@
+FROM golang:1.23 AS builder
+
+WORKDIR /app
+
+COPY go.mod go.sum ./
+
+RUN go mod download
+
+COPY . .
+
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o petition ./cmd/app
+
+FROM alpine:3 AS app
+
+RUN apk --no-cache add ca-certificates
+
+COPY --from=builder /app/petition /petition
+
+CMD ["/petition"]

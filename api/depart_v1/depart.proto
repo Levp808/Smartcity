@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+option go_package = "pkg/depart_v1";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+
+package api;
+
+service DepartmentService {
+  rpc UpdateReport(UpdateReportRequest) returns (UpdateReportResponse){};
+}
+
+message UpdateReportRequest{
+  string petition_id = 1;
+  google.protobuf.StringValue content_job = 2;
+  google.protobuf.Timestamp done_at = 3;
+}
+
+message UpdateReportResponse{
+  bool success = 1;
+  ErrorCode error_message = 2;
+}
+
+enum ErrorCode {
+    NONE = 0;
+    NOT_FOUND = 1;
+    BAD_REQUEST = 2;
+}
+
+

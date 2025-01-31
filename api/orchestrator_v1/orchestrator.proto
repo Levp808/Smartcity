@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option go_package = "pkg/grpc/pb";
+
+package api;
+
+service OrchestratorService {
+  rpc Moderation(ModerationRequest) returns (ModerationResponse){};
+}
+
+message ModerationRequest{
+  string id = 1;
+  string location = 2;
+  string description = 3;
+}
+
+message ModerationResponse{
+  string depart = 1;
+}
+
+

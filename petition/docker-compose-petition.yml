@@ -1,0 +1,39 @@
+networks:
+  default:
+
+services:
+  petition:
+    build:
+      dockerfile: "./Dockerfile.petition"
+      context: "."
+      target: "app"
+    container_name: petition
+    ports:
+      - "50049:50049"
+    networks:
+      - default
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16-alpine
+    container_name: petition-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB_PETITION}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgpetitiondata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB_PETITON}"]
+      interval: 30s
+      retries: 5  
+      timeout: 5s 
+      start_period: 30s
+
+volumes:
+  pgpetitiondata:

@@ -1,0 +1,164 @@
+networks:
+  default:
+
+services:
+  petition:
+    build:
+      context: "./petition"
+      dockerfile: "Dockerfile.petition"
+      target: "app"
+    container_name: petition
+    ports:
+      - "0.0.0.0:50049:50049"
+    depends_on:
+      - db-petition
+    deploy:
+      restart_policy:
+        delay: 5s
+        window: 60s
+    network_mode: "host"
+
+  orchestrator:
+    build:
+      context: "./orchestrator"
+      dockerfile: "Dockerfile"
+    container_name: orchestrator
+    ports:
+      - "0.0.0.0:50051:50051"
+    deploy:
+      restart_policy:
+        delay: 5s
+        window: 60s
+    network_mode: "host"
+
+  depart-comm:
+    build:
+      context: "./depart"
+      dockerfile: "Dockerfile.depart"
+    container_name: depart-comm
+    ports:
+      - "0.0.0.0:50048:50048"
+    environment:
+      DEPART_GRPC_SERVER_ADDRESS: "0.0.0.0:50048"
+      DEPART_GRPC_GATEWAY_SERVER_ADDRESS: "0.0.0.0:8085"
+      DEPART_PETITION_GRPC_SERVICE_URL: "0.0.0.0:50049"
+      DEPART_DB_USER: "postgres"
+      DEPART_DB_PASSWORD: "password"
+      DEPART_DB_HOST: "0.0.0.0:5431"
+      DEPART_DB_NAME: "report"
+      DEPART_LOG_LEVEL: "1"
+      DEPART_KAFKA_BROKERS: "localhost:9092"
+      DEPART_TOPIC_NAMES: "CommDepart"
+      DEPART_CONSUMER_GROUP_ID: "CommDepart-group"
+    depends_on:
+      - db-comm
+    deploy:
+      restart_policy:
+        delay: 5s
+        window: 60s
+    network_mode: "host"
+
+  depart-road:
+    build:
+      context: "./depart"
+      dockerfile: "Dockerfile.depart"
+    container_name: depart-road
+    ports:
+      - "0.0.0.0:50047:50047"
+    environment:
+      DEPART_GRPC_SERVER_ADDRESS: "0.0.0.0:50047"
+      DEPART_GRPC_GATEWAY_SERVER_ADDRESS: "0.0.0.0:8084"
+      DEPART_PETITION_GRPC_SERVICE_URL: "0.0.0.0:50049"
+      DEPART_DB_USER: "postgres"
+      DEPART_DB_PASSWORD: "password"
+      DEPART_DB_HOST: "0.0.0.0:5430"
+      DEPART_DB_NAME: "report"
+      DEPART_LOG_LEVEL: "1"
+      DEPART_KAFKA_BROKERS: "localhost:9092"
+      DEPART_TOPIC_NAMES: "RoadDepart"
+      DEPART_CONSUMER_GROUP_ID: "RoadDepart-group"
+    depends_on:
+      - db-road
+    deploy:
+      restart_policy:
+        delay: 5s
+        window: 60s
+    network_mode: "host"
+
+  db-petition:
+    image: postgres:16-alpine
+    container_name: db-petition
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB_PETITION}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgpetitiondata:/var/lib/postgresql/data
+    ports:
+      - "0.0.0.0:5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB_PETITION}"]
+      interval: 30s
+      retries: 5  
+      timeout: 5s 
+      start_period: 30s
+    deploy:
+      restart_policy:
+        delay: 5s
+        window: 60s
+    networks:
+      - default
+
+  db-comm:
+    image: postgres:16-alpine
+    container_name: db-comm
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB_DEPART}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgreportdata-comm:/var/lib/postgresql/data
+    ports:
+      - "0.0.0.0:5431:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB_DEPART}"]
+      interval: 30s
+      retries: 5  
+      timeout: 5s 
+      start_period: 30s
+    deploy:
+      restart_policy:
+        delay: 5s
+        window: 60s
+    networks:
+      - default
+
+  db-road:
+    image: postgres:16-alpine
+    container_name: db-road
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB_DEPART}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgreportdata-road:/var/lib/postgresql/data
+    ports:
+      - "0.0.0.0:5430:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB_DEPART}"]
+      interval: 30s
+      retries: 5  
+      timeout: 5s 
+      start_period: 30s
+    deploy:
+      restart_policy:
+        delay: 5s
+        window: 60s
+    networks:
+      - default
+
+volumes:
+  pgpetitiondata:
+  pgreportdata-comm:
+  pgreportdata-road:
+  
