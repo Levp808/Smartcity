@@ -4,7 +4,7 @@
 [Docker](https://docs.docker.com/engine/install/)
 2. Get the source code
 ```
-git clone https://gitlab.crja72.ru/gospec/team06/smartcity.git
+git clone https://github.com/Levp808/Smartcity.git
 ```
 3. Change the directory
 ```
